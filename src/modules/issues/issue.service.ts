@@ -3,7 +3,7 @@ import type { ICreateIssueRequest, IIssue } from "./issue.interface"
 
 export const createIssueIntoDB = async (data: ICreateIssueRequest) => {
 
-    const { title, description, type , reporter_id } = data;
+    const { title, description, type, reporter_id } = data;
     const result = await pool.query(
         `INSERT INTO issues (title, description, type,reporter_id) VALUES ($1, $2, $3, $4) RETURNING *`,
         [title, description, type, reporter_id]
@@ -76,7 +76,22 @@ export const getIssueByIdFromDB = async (id: number) => {
 
 
 
-export const updateIssueInDB = async (id: number, data: ICreateIssueRequest & { status?: string }) => { }
+export const updateIssueInDB = async (id: number, data: ICreateIssueRequest & { status?: string }) => {
+    const { title, description, type, status } = data;
+    const result = await pool.query(
+        `UPDATE issues 
+        SET title = COALESCE($1, title),
+        description = COALESCE($2, description),
+        type = COALESCE($3, type),
+        status = COALESCE($4, status),
+        updated_at = NOW()
+        WHERE id = $5 RETURNING *`,
+        [title, description, type, status, id]
+    )
+    return result.rows[0];
+
+
+}
 
 export const deleteIssueFromDB = async (id: number) => {
     await pool.query(
