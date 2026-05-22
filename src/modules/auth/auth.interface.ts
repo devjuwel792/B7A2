@@ -1,4 +1,4 @@
-type Role = "contributor" | "maintainer";
+export type Role = "contributor" | "maintainer";
 export interface ICreateUserRequest {
   name: string;
   email: string;
