@@ -1,18 +1,15 @@
 import type { Request, Response } from "express";
 import sendResponse from "../../utility/sendResponse";
-import { createUser } from "./auth.service";
+import { checkEmailExists, createUser } from "./auth.service";
 import { pool } from "../../db";
 import type { ICreateUserRequest } from "./auth.interface";
 
 export const signup = async (req: Request, res: Response) => {
   const { email, name, password, role } = req.body as ICreateUserRequest;
   try {
-    const existingUser = await pool.query(
-      `SELECT  * FROM users WHERE  email = $1 `,
-      [email],
-    );
+    const existingUser = await checkEmailExists(email);
 
-    if (existingUser.rows.length !== 0) {
+    if (existingUser) {
       sendResponse(res, 400, {
         success: false,
         message: "User with this email already exists",

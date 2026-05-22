@@ -15,4 +15,14 @@ export const createUser = async (req: Request) => {
   return user;
 };
 
-export const loginUser = async (req: Request, res: Response) => {};
+export const checkEmailExists = async (email: string) => {
+  const result = await pool.query(
+    `SELECT  * FROM users WHERE  email = $1 `,
+    [email],
+  );
+  return result.rows.length > 0;
+}
+
+export const loginUser = async (req: Request, res: Response) => { };
+
+
