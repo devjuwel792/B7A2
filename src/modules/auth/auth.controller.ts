@@ -15,7 +15,7 @@ export const signup = async (req: Request, res: Response) => {
       sendResponse(res, StatusCodes.BAD_REQUEST, {
         success: false,
         message: "User with this email already exists",
-        error: "User with this email already exists",
+        error: "Validation error"
       });
     }
 
@@ -58,7 +58,7 @@ export const login = async (req: Request, res: Response) => {
       sendResponse(res, StatusCodes.BAD_REQUEST, {
         success: false,
         message: "Invalid email",
-        error: "Invalid email",
+        error: "Validation error",
       });
       return;
     }
@@ -69,7 +69,7 @@ export const login = async (req: Request, res: Response) => {
       sendResponse(res, StatusCodes.BAD_REQUEST, {
         success: false,
         message: "Invalid password",
-        error: "Invalid password",
+        error: "Validation error",
       });
       return;
     }
