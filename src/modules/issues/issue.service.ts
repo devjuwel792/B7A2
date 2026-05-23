@@ -102,7 +102,7 @@ export const updateIssueInDB = async (id: number, data: Partial<IIssueRequest>) 
 
 export const deleteIssueFromDB = async (id: number) => {
     await pool.query(
-        ` DELETE FROM issues WHERE id = $1`,
+        `DELETE FROM issues WHERE id = $1`,
         [id]
     );
 }
