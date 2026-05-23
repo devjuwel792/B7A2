@@ -4,7 +4,7 @@ import { getUserByEmail, signupUser } from "./auth.service";
 import type { ICreateUserRequest, ILoginRequest } from "./auth.interface";
 import bcrypt from "bcrypt";
 import { generateToken } from "../../utility/generateToken";
-import { StatusCodes } from "http-status-codes/build/cjs/status-codes";
+import { StatusCodes } from "http-status-codes";
 
 export const signup = async (req: Request, res: Response) => {
   const { email, name, password, role } = req.body as ICreateUserRequest;
