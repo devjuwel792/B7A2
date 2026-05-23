@@ -19,7 +19,7 @@ app.use(
 );
 app.use(morgan("dev"));
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World!");
+  res.send("Welcome to the Issue Tracker API");
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/issues", issuesRoutes);
