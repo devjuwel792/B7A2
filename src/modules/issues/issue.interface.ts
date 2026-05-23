@@ -17,7 +17,7 @@ export interface IIssue {
 }
 
 
-export interface ICreateIssueRequest {
+export interface IIssueRequest {
     title: string;
     description: string;
     type: IssueType;

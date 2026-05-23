@@ -1,13 +1,13 @@
 import type { Request, Response } from "express";
-import type { ICreateIssueRequest, IIssue } from "./issue.interface";
-import { createIssueIntoDB, deleteIssueFromDB, getAllIssuesFromDB, getIssueByIdFromDB } from "./issue.service";
+import type { IIssueRequest, IIssue } from "./issue.interface";
+import { checkIssueOwner, createIssueIntoDB, deleteIssueFromDB, getAllIssuesFromDB, getIssueByIdFromDB, updateIssueInDB } from "./issue.service";
 import sendResponse from "../../utility/sendResponse";
 
 
 
 export const createIssue = async (req: Request, res: Response) => {
 
-    const { title, description, type } = req.body as ICreateIssueRequest;
+    const { title, description, type } = req.body as IIssueRequest;
     const reporter_id = req?.user?.id as number;
 
     if (!title || !description || !type) {
@@ -126,7 +126,64 @@ export const getIssueById = async (req: Request, res: Response) => {
     }
 }
 
-export const updateIssueStatus = async (req: Request, res: Response) => {}
+export const updateIssue = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const { title, description, type } = req.body as Partial<IIssueRequest>;
+    const user = req?.user;
+
+    if (!id || isNaN(Number(id))) {
+        sendResponse(res, 400, {
+            success: false,
+            message: "Invalid issue ID",
+            error: "Validation error"
+        });
+    }
+    try {
+        if (user?.role !== "maintainer") {
+            const isOwner = await checkIssueOwner(Number(id), user?.id as number);
+            if (!isOwner) {
+                sendResponse(res, 403, {
+                    success: false,
+                    message: "You are not authorized to update this issue",
+                    error: "Authorization error"
+                });
+            }
+        }
+
+        const updatedIssue = await updateIssueInDB(Number(id), {
+            title: title,
+            description: description,
+            type: type
+        } as Partial<IIssueRequest>);
+
+        if (!updatedIssue) {
+            sendResponse(res, 404, {
+                success: false,
+                message: "Issue not found",
+                error: "Not found"
+            });
+            return;
+        }
+
+        sendResponse(res, 200, {
+            success: true,
+            message: "Issue updated successfully",
+            data: {
+                id: updatedIssue.id,
+                title: updatedIssue.title,
+                description: updatedIssue.description,
+                type: updatedIssue.type,
+                status: updatedIssue.status,
+                reporter_id: updatedIssue.reporter_id,
+                created_at: updatedIssue.created_at,
+                updated_at: updatedIssue.updated_at
+            }
+        });
+    }
+    catch (error) {
+    }
+}
 
 export const deleteIssue = async (req: Request, res: Response) => {
     const { id } = req.params;

@@ -1,7 +1,7 @@
 import { pool } from "../../db"
-import type { ICreateIssueRequest, IIssue } from "./issue.interface"
+import type { IIssueRequest, IIssue } from "./issue.interface"
 
-export const createIssueIntoDB = async (data: ICreateIssueRequest) => {
+export const createIssueIntoDB = async (data: IIssueRequest) => {
 
     const { title, description, type, reporter_id } = data;
     const result = await pool.query(
@@ -74,19 +74,26 @@ export const getIssueByIdFromDB = async (id: number) => {
     return result.rows[0];
 }
 
+export const checkIssueOwner = async (issueId: number, userId: number) => {
+    const result = await pool.query(
+        `SELECT * FROM issues WHERE id = $1 AND reporter_id = $2`,
+        [issueId, userId]
+    );
+    return result.rows.length > 0;
+}
 
 
-export const updateIssueInDB = async (id: number, data: ICreateIssueRequest & { status?: string }) => {
-    const { title, description, type, status } = data;
+
+export const updateIssueInDB = async (id: number, data: Partial<IIssueRequest>) => {
+    const { title, description, type } = data;
     const result = await pool.query(
         `UPDATE issues 
         SET title = COALESCE($1, title),
         description = COALESCE($2, description),
         type = COALESCE($3, type),
-        status = COALESCE($4, status),
         updated_at = NOW()
-        WHERE id = $5 RETURNING *`,
-        [title, description, type, status, id]
+        WHERE id = $4 RETURNING *`,
+        [title, description, type, id]
     )
     return result.rows[0];
 
