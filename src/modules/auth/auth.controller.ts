@@ -4,6 +4,7 @@ import { getUserByEmail, signupUser } from "./auth.service";
 import type { ICreateUserRequest, ILoginRequest } from "./auth.interface";
 import bcrypt from "bcrypt";
 import { generateToken } from "../../utility/generateToken";
+import { StatusCodes } from "http-status-codes/build/cjs/status-codes";
 
 export const signup = async (req: Request, res: Response) => {
   const { email, name, password, role } = req.body as ICreateUserRequest;
@@ -11,7 +12,7 @@ export const signup = async (req: Request, res: Response) => {
     const existingUser = await getUserByEmail(email);
 
     if (existingUser) {
-      sendResponse(res, 400, {
+      sendResponse(res, StatusCodes.BAD_REQUEST, {
         success: false,
         message: "User with this email already exists",
         error: "User with this email already exists",
@@ -24,7 +25,7 @@ export const signup = async (req: Request, res: Response) => {
       password,
       role,
     });
-    sendResponse(res, 201, {
+    sendResponse(res, StatusCodes.CREATED, {
       success: true,
       message: "User registered successfully",
       data: {
@@ -37,7 +38,7 @@ export const signup = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    sendResponse(res, 500, {
+    sendResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
       success: false,
       message: "Internal server error",
       error: error,
@@ -54,7 +55,7 @@ export const login = async (req: Request, res: Response) => {
     const user = await getUserByEmail(email);
 
     if (!user) {
-      sendResponse(res, 400, {
+      sendResponse(res, StatusCodes.BAD_REQUEST, {
         success: false,
         message: "Invalid email",
         error: "Invalid email",
@@ -65,7 +66,7 @@ export const login = async (req: Request, res: Response) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      sendResponse(res, 400, {
+      sendResponse(res, StatusCodes.BAD_REQUEST, {
         success: false,
         message: "Invalid password",
         error: "Invalid password",
@@ -80,7 +81,7 @@ export const login = async (req: Request, res: Response) => {
       role: user.role,
     });
 
-    sendResponse(res, 200, {
+    sendResponse(res, StatusCodes.OK, {
       success: true,
       message: "Login successful",
       data: {
@@ -99,7 +100,7 @@ export const login = async (req: Request, res: Response) => {
 
 
   } catch (error) {
-    sendResponse(res, 500, {
+    sendResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
       success: false,
       message: "Internal server error",
       error: error,

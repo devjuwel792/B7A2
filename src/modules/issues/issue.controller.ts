@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import type { IIssueRequest, IIssue } from "./issue.interface";
 import { checkIssueOwner, createIssueIntoDB, deleteIssueFromDB, getAllIssuesFromDB, getIssueByIdFromDB, updateIssueInDB } from "./issue.service";
 import sendResponse from "../../utility/sendResponse";
+import { StatusCodes } from "http-status-codes";
 
 
 
@@ -11,7 +12,7 @@ export const createIssue = async (req: Request, res: Response) => {
     const reporter_id = req?.user?.id as number;
 
     if (!title || !description || !type) {
-        sendResponse(res, 400, {
+        sendResponse(res, StatusCodes.BAD_REQUEST, {
             success: false,
             message: "Title, description and type are required",
             error: "Validation error"
@@ -20,7 +21,7 @@ export const createIssue = async (req: Request, res: Response) => {
     }
 
     if (title.length > 150) {
-        sendResponse(res, 400, {
+        sendResponse(res, StatusCodes.BAD_REQUEST, {
             success: false,
             message: "Title should not exceed 150 characters",
             error: "Validation error"
@@ -28,7 +29,7 @@ export const createIssue = async (req: Request, res: Response) => {
         return;
     }
     if (description.length < 20) {
-        sendResponse(res, 400, {
+        sendResponse(res, StatusCodes.BAD_REQUEST, {
             success: false,
             message: "Description should be at least 20 characters long",
             error: "Validation error"
@@ -37,7 +38,7 @@ export const createIssue = async (req: Request, res: Response) => {
     }
 
     if (type !== "bug" && type !== "feature_request") {
-        sendResponse(res, 400, {
+        sendResponse(res, StatusCodes.BAD_REQUEST, {
             success: false,
             message: "Invalid issue type",
             error: "Validation error"
@@ -51,7 +52,7 @@ export const createIssue = async (req: Request, res: Response) => {
             type,
             reporter_id
         });
-        sendResponse(res, 201, {
+        sendResponse(res, StatusCodes.CREATED, {
             success: true,
             message: "Issue created successfully",
             data: {
@@ -66,7 +67,7 @@ export const createIssue = async (req: Request, res: Response) => {
             }
         });
     } catch (error) {
-        sendResponse(res, 500, {
+        sendResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             success: false,
             message: "Internal server error",
             error: error
@@ -85,12 +86,12 @@ export const getIssues = async (req: Request, res: Response) => {
     try {
         const issues: IIssue[] = await getAllIssuesFromDB(params);
 
-        sendResponse(res, 200, {
+        sendResponse(res, StatusCodes.OK, {
             success: true,
             data: issues
         });
     } catch (error) {
-        sendResponse(res, 500, {
+        sendResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             success: false,
             message: "Internal server error",
             error: error
@@ -103,7 +104,7 @@ export const getIssues = async (req: Request, res: Response) => {
 export const getIssueById = async (req: Request, res: Response) => {
     const { id } = req.params;
     if (!id || isNaN(Number(id))) {
-        sendResponse(res, 400, {
+        sendResponse(res, StatusCodes.BAD_REQUEST, {
             success: false,
             message: "Invalid issue ID",
             error: "Validation error"
@@ -112,12 +113,12 @@ export const getIssueById = async (req: Request, res: Response) => {
     }
     try {
         const issue = await getIssueByIdFromDB(Number(id));
-        sendResponse(res, 200, {
+        sendResponse(res, StatusCodes.OK, {
             success: true,
             data: issue
         });
     } catch (error) {
-        sendResponse(res, 500, {
+        sendResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             success: false,
             message: "Internal server error",
             error: error
@@ -133,7 +134,7 @@ export const updateIssue = async (req: Request, res: Response) => {
     const user = req?.user;
 
     if (!id || isNaN(Number(id))) {
-        sendResponse(res, 400, {
+        sendResponse(res, StatusCodes.BAD_REQUEST, {
             success: false,
             message: "Invalid issue ID",
             error: "Validation error"
@@ -143,7 +144,7 @@ export const updateIssue = async (req: Request, res: Response) => {
         if (user?.role !== "maintainer") {
             const isOwner = await checkIssueOwner(Number(id), user?.id as number);
             if (!isOwner) {
-                sendResponse(res, 403, {
+                sendResponse(res, StatusCodes.FORBIDDEN, {
                     success: false,
                     message: "You are not authorized to update this issue",
                     error: "Authorization error"
@@ -158,7 +159,7 @@ export const updateIssue = async (req: Request, res: Response) => {
         } as Partial<IIssueRequest>);
 
         if (!updatedIssue) {
-            sendResponse(res, 404, {
+            sendResponse(res, StatusCodes.NOT_FOUND, {
                 success: false,
                 message: "Issue not found",
                 error: "Not found"
@@ -166,7 +167,7 @@ export const updateIssue = async (req: Request, res: Response) => {
             return;
         }
 
-        sendResponse(res, 200, {
+        sendResponse(res, StatusCodes.OK, {
             success: true,
             message: "Issue updated successfully",
             data: {
@@ -188,7 +189,7 @@ export const updateIssue = async (req: Request, res: Response) => {
 export const deleteIssue = async (req: Request, res: Response) => {
     const { id } = req.params;
     if (!id || isNaN(Number(id))) {
-        sendResponse(res, 400, {
+        sendResponse(res, StatusCodes.BAD_REQUEST, {
             success: false,
             message: "Invalid issue ID",
             error: "Validation error"
@@ -198,7 +199,7 @@ export const deleteIssue = async (req: Request, res: Response) => {
     try {
         const getIssue = await getIssueByIdFromDB(Number(id));
         if (!getIssue) {
-            sendResponse(res, 404, {
+            sendResponse(res, StatusCodes.NOT_FOUND, {
                 success: false,
                 message: "Issue not found",
                 error: "Not found"
@@ -207,13 +208,13 @@ export const deleteIssue = async (req: Request, res: Response) => {
         }
         await deleteIssueFromDB(Number(id));
 
-        sendResponse(res, 200, {
+        sendResponse(res, StatusCodes.OK, {
             success: true,
             message: "Issue deleted successfully",
         });
 
     } catch (error) {
-        sendResponse(res, 500, {
+        sendResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             success: false,
             message: "Internal server error",
             error: error

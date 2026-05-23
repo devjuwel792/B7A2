@@ -4,6 +4,7 @@ import sendResponse from "../utility/sendResponse";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { config } from "../config";
 import { pool } from "../db";
+import { StatusCodes } from "http-status-codes";
 
 
 const auth = (...roles: Role[]) => {
@@ -13,7 +14,7 @@ const auth = (...roles: Role[]) => {
         try {
             const token = req.headers.authorization as string;
             if (!token) {
-                sendResponse(res, 401, {
+                sendResponse(res, StatusCodes.UNAUTHORIZED, {
                     success: false,
                     message: "No token provided",
                     error: "Unauthorized"
@@ -24,7 +25,7 @@ const auth = (...roles: Role[]) => {
             const decoded = jwt.verify(token, config.jwtSecret as string) as JwtPayload;
             const currentUser = await pool.query("SELECT * FROM users WHERE id = $1", [decoded.id]);
             if (!currentUser.rows[0]) {
-                sendResponse(res, 401, {
+                sendResponse(res, StatusCodes.UNAUTHORIZED, {
                     success: false,
                     message: "User not found",
                     error: "Unauthorized"
@@ -33,7 +34,7 @@ const auth = (...roles: Role[]) => {
             }
 
             if (roles.length && !roles.includes(currentUser.rows[0].role)) {
-                sendResponse(res, 403, {
+                sendResponse(res, StatusCodes.FORBIDDEN, {
                     success: false,
                     message: "You do not have permission to access this resource",
                     error: "Forbidden"
@@ -43,7 +44,7 @@ const auth = (...roles: Role[]) => {
             req.user = decoded;
             next();
         } catch (error) {
-            sendResponse(res, 500, {
+            sendResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
                 success: false,
                 message: "Internal server error",
                 error: error
