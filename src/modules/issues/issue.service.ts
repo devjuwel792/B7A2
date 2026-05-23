@@ -8,7 +8,7 @@ export const createIssueIntoDB = async (data: ICreateIssueRequest) => {
         `INSERT INTO issues (title, description, type,reporter_id) VALUES ($1, $2, $3, $4) RETURNING *`,
         [title, description, type, reporter_id]
     );
-    return result.rows[0];
+    return { ...result.rows[0] } as IIssue & { reporter_id: string };
 }
 
 
