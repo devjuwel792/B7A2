@@ -7,4 +7,8 @@ const main = () => {
   });
 };
 
-main();
+if (!process.env.VERCEL) {
+  main();
+}
+
+export default app;
