@@ -5,13 +5,18 @@ import { initDB } from "./db";
 import authRoutes from "./modules/auth/auth.route";
 import issuesRoutes from "./modules/issues/issue.router";
 import globalErrorHandler from "./middleware/globalErrorHandler";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 initDB();
-
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  }),
+);
 app.use(morgan("dev"));
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");

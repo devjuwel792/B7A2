@@ -38,8 +38,8 @@ https://b7-a2-juwel.vercel.app/
 ## User Roles & Permissions
 | Role | Allowed Actions |
 |---|---|
-| contributor | Register and log in • Create new issues • View all issues • Update own issue field |
-| maintainer | All contributor permissions • Update any issue field • Delete any issue • Change issue workflow status independently |
+| contributor | Register and log in <br/>  Create new issues <br/> View all issues <br/> Update own issue field |
+| maintainer | All contributor permissions <br/> Update any issue field <br/> Delete any issue <br/> Change issue workflow status independently |
 
 ## Authentication & Authorization
 **JWT Flow**
@@ -88,7 +88,9 @@ https://b7-a2-juwel.vercel.app/
    - Add a `.env` file with at least:
      - `DATABASE_URL`
      - `JWT_SECRET`
+     - `PORT`
      - `JWT_EXPIRES_IN` (optional; default is `1h`)
+
 4. **Run database initialization**
    - The server calls `initDB()` at startup to create tables if they don’t exist.
 5. **Start the server**
